@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
+import sys 
 
 # Create a connection to mysql db 
 def create_db_connection(hostname, username, userpassword, dbname):
@@ -37,8 +38,16 @@ def execute_query(connection, query):
     except Error as err:
         print(f"Error: '{err}'")
 
-connection = create_db_connection("localhost", "root", "lougrace")
 
-create_database_query = "CREATE DATABASE school"
 
-create_database(connection, create_database_query)
+def main(hostname, username, userpassword, dbname, query):
+    connection = create_db_connection(hostname,username,userpassword,dbname)
+
+    create_database(connection, query)
+    execute_query(connection, query)
+
+if __name__ == "__main__":
+    args = sys.argv
+    hostname, username, userpassword, dbname, query = args[1:]
+
+    main(hostname, username, userpassword, dbname, query)
