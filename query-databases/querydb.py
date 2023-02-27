@@ -1,16 +1,18 @@
 import mysql.connector
 from mysql.connector import Error
-import pandas as pd
-import sys 
+import typer 
+import os 
 
-# Create a connection to mysql db 
-def create_db_connection(hostname, username, userpassword, dbname):
+app = typer.Typer()
+
+# Create a connection to mysql db
+def create_db_connection(dbname):
     connection = None
     try:
         connection = mysql.connector.connect(
-            host=hostname,
-            user=username,
-            passwd=userpassword,
+            host=os.getenv('HOSTNAME'),
+            user=os.getenv('DB_USER'),
+            passwd=os.getenv('DB_PASS'),
             database=dbname
         )
         print("MySQL Database connection successful")
@@ -20,7 +22,9 @@ def create_db_connection(hostname, username, userpassword, dbname):
     return connection
 
 # Function to create a database
-def create_database(connection, query):
+@app.command()
+def create_database(dbname: str, query: str):
+    connection = create_db_connection(dbname)
     cursor = connection.cursor()
     try:
         cursor.execute(query)
@@ -29,7 +33,9 @@ def create_database(connection, query):
         print(f"Error: '{err}'")
 
 # Create a query execution function
-def execute_query(connection, query):
+@app.command()
+def execute_query(dbname: str, query: str):
+    connection = create_db_connection(dbname)
     cursor = connection.cursor()
     try:
         cursor.execute(query)
@@ -39,15 +45,5 @@ def execute_query(connection, query):
         print(f"Error: '{err}'")
 
 
-
-def main(hostname, username, userpassword, dbname, query):
-    connection = create_db_connection(hostname,username,userpassword,dbname)
-
-    create_database(connection, query)
-    execute_query(connection, query)
-
 if __name__ == "__main__":
-    args = sys.argv
-    hostname, username, userpassword, dbname, query = args[1:]
-
-    main(hostname, username, userpassword, dbname, query)
+    app()
